@@ -55,3 +55,6 @@ Normal client `/api/news?country=UG` requests now use D1's **recent successfully
 
 ## Full archive search
 `GET /api/search?q=...` performs bounded, parameterized D1 searches over attributed headline/excerpt metadata and returns a maximum of 60 matches. The reader-facing Search page now uses this endpoint rather than searching only the current ~120 RSS stories, preserves a shareable `/search?q=` route, and provides loading/empty/error states. No publisher full article bodies are indexed.
+
+### Source excerpt quality
+Google News regional RSS often contains nested HTML links instead of licensed editorial summary text. GlobalNews now intentionally omits those aggregator descriptions rather than showing broken markup or pretending to have full article text. Nonregional RSS descriptions are cleaned and publisher attributed. Existing archive records from Google News are normalized in reader/search API outputs while future ingest stores clean metadata.
