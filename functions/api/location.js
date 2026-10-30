@@ -1,0 +1,1 @@
+const CODES=new Set(["UG","KE","TZ","NG","ZA","US","GB","CA","IN","DE","FR","BR","JP","AU"]);export function onRequestGet({request}){const country=String(request.cf?.country||"").toUpperCase();return Response.json({country:CODES.has(country)?country:null},{headers:{"Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff"}})}

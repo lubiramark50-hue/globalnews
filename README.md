@@ -1,31 +1,39 @@
 # GlobalNews
 
-A regional, multilingual-ready global news platform built for Cloudflare Pages and Workers.
+**Live website:** https://globalnews-a0q.pages.dev/  
+**GitHub:** https://github.com/lubiramark50-hue/globalnews
 
-## Project
-- `public/` — mobile, tablet, desktop editorial frontend, categories, search, saved articles, reader views, region/language settings, and dark mode.
-- `functions/api/news.js` — Cloudflare Pages Function: fetches attributed RSS headlines, deduplicates, provides local country feeds, caches for 10 minutes. The site **does not fabricate headlines**.
-- `worker/ingest.js` and `worker/wrangler.toml` — independent, scheduled 10-minute discovery coordinator. Once deployed and configured with database secrets, writes records to Supabase.
-- `sql/schema.sql` — SQL migration for a dedicated GlobalNews Supabase database.
-- `.github/workflows/validate.yml` — syntax validation for commits.
+GlobalNews is a source-attributed, location-aware, responsive news discovery website running on Cloudflare Pages and Workers. It is a **first release**, not yet a production-hardened AI news publisher.
 
-## Cloudflare Pages
-Project `globalnews`, repository `lubiramark50-hue/globalnews`, production branch `main`, build command empty, output directory `public`.
+## Implemented
+- Responsive editorial frontend with world, regional, technology, business, sports, science and video pages, article reader, search, bookmarks, theme and locale settings.
+- Automatic **country suggestion** from Cloudflare's approximate country metadata. Readers may override location; no device GPS is required. Supports 14 country choices.
+- Cloudflare Pages Functions fetch public RSS headlines/excerpts from a small vetted list of feeds, including BBC, the Guardian, Al Jazeera and Google News RSS search for selected countries.
+- Publisher names and original article links are displayed; source snippets are **not** portrayed as AI-generated editorial reporting.
+- News API cached at Cloudflare edge for 10 minutes, client refreshes every 10 minutes without rebuilding the website.
+- Separate `globalnews-ingest` Cloudflare Worker with Cron Trigger `*/10 * * * *`. It rotates over two countries per run to reduce quotas; a full 14-country rotation therefore spans approximately 70 minutes.
+- Independent Cloudflare D1 database `globalnews-db`, with tables `articles` and `ingestion_log`. Cron writes new source entries using INSERT OR IGNORE. The frontend API can use D1 as fallback if all upstream feeds fail.
+- GitHub Actions JavaScript syntax validation. GitHub-to-Cloudflare Pages auto deployments of code updates.
 
-## Deploy the independent 10-minute collector
-Deploy the `worker` folder with Wrangler, then set:
+## Deployment configuration
+Cloudflare account: managed via its own dashboard. Project `globalnews`, GitHub owner `lubiramark50-hue`, repo `globalnews`, production branch `main`, static output `public`, no build step. `functions/` are published as Pages Functions. This project does not require Supabase or a VPS.
+
+Worker source: `worker/ingest.js`, Wrangler config: `worker/wrangler.toml`. Database migration: `sql/d1-schema.sql`. Set D1 binding `DB` with the database UUID from the Wrangler config. Do not commit secrets.
+
+## Limits and safeguards
+- Curated RSS discovery is **not comprehensive worldwide coverage**. Publishers can be delayed, inaccessible, or restrict reuse.
+- The app currently shows **original source excerpts**, **not** OpenAI summaries. OpenAI editorial processing and translation are NOT enabled without a funded OpenAI API key, server-only secrets, reliable source verification, review controls and budget protection. Never expose API keys to the browser.
+- Language options currently save a preference but do **not** translate articles. The interface explicitly tells users this.
+- Videos link to original news channels; full videos or copyrighted publisher assets are not hosted without permission.
+- Verify editorial facts with primary sources and ensure corrections/withdrawals are supported before scaling.
+- D1 and Worker quotas, RSS publisher rights, and Cloudflare account usage must be monitored, especially alongside other hosted projects.
+
+## Testing
 ```sh
-cd worker
-npx wrangler deploy
-npx wrangler secret put SUPABASE_URL
-npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+node --check public/app.js
+node --check functions/api/news.js
+node --check functions/api/location.js
+node --check worker/ingest.js
 ```
-Do not commit or expose credentials in the frontend. Apply `sql/schema.sql` to a **new** Supabase project first.
 
-## Accuracy and media safeguards
-Currently the interface displays original RSS **headlines and excerpts**, labelled clearly with external source links. AI-generated original summaries and multilingual article translations are **not enabled** until an OpenAI API key, stronger multi-source verification rules, translation QA and a budget policy are configured. Videos link to official channels and are not copied or hosted. Source-provided thumbnails are used only as remote images; honor source rights and takedown requests.
-
-## Validation
-`node --check public/app.js && node --check functions/api/news.js && node --check worker/ingest.js`
-
-The website can serve content without Supabase. The scheduled collector requires deployment and database credentials. Reader location is selected manually; user choices and bookmarks are stored only in their browser.
+Live smoke tests: `/`, `/api/news?country=UG`, `/api/location`. Inspect Cloudflare Worker Cron logs and D1 `ingestion_log` for successful scheduled execution.
