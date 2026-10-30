@@ -3,5 +3,10 @@ main = "ingest.js"
 compatibility_date = "2026-10-30"
 workers_dev = true
 
+[[d1_databases]]
+binding = "DB"
+database_name = "globalnews-db"
+database_id = "045350b1-588a-4627-ba53-16b58cfaee05"
+
 [triggers]
 crons = ["*/10 * * * *"]

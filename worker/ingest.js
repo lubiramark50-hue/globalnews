@@ -1,6 +1,43 @@
-/** Cloudflare scheduled job: 10-minute independent source discovery.
- * Requires a separate Supabase project. Never include database keys in git.
+/** 10-minute Cloudflare Cron → source feeds → GlobalNews D1.
+ * D1 keeps public excerpts available when original publishers are temporarily unavailable.
+ * No article is generated. The source title, excerpt and link stay intact.
  */
 const COUNTRIES=["UG","KE","TZ","NG","ZA","US","GB","CA","IN","DE","FR","BR","JP","AU"];
-async function run(env,at){const cycle=Math.floor(at/600000);const codes=[COUNTRIES[cycle%COUNTRIES.length],COUNTRIES[(cycle+7)%COUNTRIES.length]];for(const country of codes){try{const res=await fetch("https://globalnews-a0q.pages.dev/api/news?country="+country,{signal:AbortSignal.timeout(25000)});if(!res.ok)throw Error("Gateway HTTP "+res.status);const {articles=[]}=await res.json();if(!env.SUPABASE_URL||!env.SUPABASE_SERVICE_ROLE_KEY){console.log("Fetched",country,articles.length,"Database secrets not configured; nothing published");continue}const rows=articles.slice(0,30).map(x=>({external_id:x.id,headline:x.title,excerpt:x.description,source_name:x.source,source_url:x.url,image_url:x.image,category:x.category,region_code:x.region||country,regional:x.regional,published_at:x.publishedAt,ingested_at:new Date().toISOString()}));if(!rows.length)continue;const response=await fetch(env.SUPABASE_URL.replace(/\/$/,"")+"/rest/v1/news_articles?on_conflict=source_url",{method:"POST",headers:{"Content-Type":"application/json",apikey:env.SUPABASE_SERVICE_ROLE_KEY,Authorization:"Bearer "+env.SUPABASE_SERVICE_ROLE_KEY,Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(rows),signal:AbortSignal.timeout(25000)});if(!response.ok)throw Error("Supabase write failed "+response.status);console.log("Stored",country,rows.length)}catch(err){console.error("Ingestion failed",country,String(err))}}}
-export default{scheduled(event,env,ctx){ctx.waitUntil(run(env,event.scheduledTime))},fetch(req,env){if(new URL(req.url).pathname!=="/health")return new Response("Not found",{status:404});return Response.json({service:"GlobalNews ingestion",status:"available",schedule:"every 10 minutes",databaseConfigured:!!(env.SUPABASE_URL&&env.SUPABASE_SERVICE_ROLE_KEY),at:new Date().toISOString()},{headers:{"Cache-Control":"no-store"}})}};
+const FIELDS=["id","title","description","source","url","image","category","country","regional","published_at"];
+async function store(env,country,articles){
+ const rows=articles.slice(0,30).filter(x=>x.id&&x.title&&x.url).map(x=>[String(x.id),String(x.title).slice(0,400),String(x.description||"").slice(0,550),String(x.source||"Unknown"),String(x.url),x.image||null,x.category||"World",x.regional?country:null,x.regional?1:0,x.publishedAt||null]);
+ let inserted=0;
+ for(let offset=0;offset<rows.length;offset+=10){
+  const part=rows.slice(offset,offset+10);
+  const marks=part.map(()=>"("+FIELDS.map(()=>"?").join(",")+")").join(",");
+  const sql="INSERT OR IGNORE INTO articles ("+FIELDS.join(",")+") VALUES "+marks;
+  const result=await env.DB.prepare(sql).bind(...part.flat()).run();
+  inserted+=result.meta?.changes||0;
+ }
+ await env.DB.prepare("INSERT INTO ingestion_log (country,fetched,inserted,status) VALUES (?,?,?,?)").bind(country,articles.length,inserted,"ok").run();
+ return inserted;
+}
+async function run(env,at){
+ const cycle=Math.floor(at/600000);
+ const codes=[COUNTRIES[cycle%COUNTRIES.length],COUNTRIES[(cycle+7)%COUNTRIES.length]];
+ for(const country of codes){
+  try{
+   const response=await fetch("https://globalnews-a0q.pages.dev/api/news?country="+country,{signal:AbortSignal.timeout(25000)});
+   if(!response.ok)throw Error("Feed gateway HTTP "+response.status);
+   const data=await response.json();
+   if(!Array.isArray(data.articles))throw Error("Unexpected news feed format");
+   if(!env.DB){console.error("D1 binding missing, cannot store",country);continue}
+   const inserted=await store(env,country,data.articles);
+   console.log("GlobalNews",country,"checked",data.articles.length,"new",inserted);
+  }catch(e){console.error("GlobalNews cycle failed",country,String(e));if(env.DB)try{await env.DB.prepare("INSERT INTO ingestion_log(country,fetched,inserted,status) VALUES (?,?,?,?)").bind(country,0,0,String(e).slice(0,160)).run()}catch{}}
+ }
+}
+export default{
+ scheduled(controller,env,ctx){ctx.waitUntil(run(env,controller.scheduledTime))},
+ async fetch(request,env){
+  if(new URL(request.url).pathname!=="/health")return new Response("Not found",{status:404});
+  let totals={articles:0,lastCheck:null};
+  if(env.DB)try{const r=await env.DB.prepare("SELECT (SELECT count(*) FROM articles) AS total,(SELECT max(checked_at) FROM ingestion_log) AS checked").first();totals={articles:r?.total||0,lastCheck:r?.checked||null}}catch(e){totals={error:String(e)}}
+  return Response.json({service:"GlobalNews ingestion",status:"available",schedule:"every 10 minutes",databaseConfigured:!!env.DB,totals,at:new Date().toISOString()},{headers:{"Cache-Control":"no-store"}});
+ }
+};

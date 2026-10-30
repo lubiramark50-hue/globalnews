@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS articles (id TEXT PRIMARY KEY,title TEXT NOT NULL,description TEXT NOT NULL DEFAULT '',source TEXT NOT NULL,url TEXT NOT NULL UNIQUE,image TEXT,category TEXT NOT NULL DEFAULT 'World',country TEXT,regional INTEGER NOT NULL DEFAULT 0,published_at TEXT,ingested_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE INDEX IF NOT EXISTS articles_recent ON articles(published_at DESC);
+CREATE INDEX IF NOT EXISTS articles_country ON articles(country,published_at DESC);
+CREATE INDEX IF NOT EXISTS articles_category ON articles(category,published_at DESC);
+CREATE TABLE IF NOT EXISTS ingestion_log(id INTEGER PRIMARY KEY AUTOINCREMENT,country TEXT NOT NULL,checked_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,fetched INTEGER NOT NULL DEFAULT 0,inserted INTEGER NOT NULL DEFAULT 0,status TEXT NOT NULL DEFAULT 'ok');
