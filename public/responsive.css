@@ -28,3 +28,14 @@ html{scroll-padding-top:100px}body{min-width:0;overflow-x:clip}.skip-content{pos
 @media(min-width:761px){.ad-native[data-ad-placement="feed"]{display:none!important}}
 @media(max-width:760px){.ad-native[data-ad-placement="sidebar"]{display:none!important}.ad-native[data-ad-placement="feed"].ad-ready:not([hidden]){display:block;grid-column:1/-1;width:100%;margin:8px 0 16px}}
 [data-theme="dark"] .nav.open{background:var(--card);color:var(--ink)}
+
+/* Article archive fallback, longer titles, safe-area and adaptive card reading. */
+.reader{max-width:920px}.reader .summary-block{overflow-wrap:anywhere}
+.story-card .story-meta{overflow-wrap:anywhere}
+@media(max-width:760px){
+ .mobile-dock{padding-bottom:max(6px,env(safe-area-inset-bottom))}
+ .story-body{min-width:0}
+ .story-body h3 a{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+ .hero .hero-body{max-width:100%}
+ .reader .primary-link{max-width:100%;overflow-wrap:anywhere;text-align:center}
+}

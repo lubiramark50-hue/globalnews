@@ -10,7 +10,7 @@ async function store(env,country,articles){
  for(let offset=0;offset<rows.length;offset+=10){
   const part=rows.slice(offset,offset+10);
   const marks=part.map(()=>"("+FIELDS.map(()=>"?").join(",")+")").join(",");
-  const sql="INSERT OR IGNORE INTO articles ("+FIELDS.join(",")+") VALUES "+marks;
+  const sql="INSERT INTO articles ("+FIELDS.join(",")+") VALUES "+marks+" ON CONFLICT(url) DO UPDATE SET title=excluded.title,description=excluded.description,image=COALESCE(excluded.image,articles.image),published_at=COALESCE(excluded.published_at,articles.published_at),ingested_at=CURRENT_TIMESTAMP WHERE articles.title<>excluded.title OR articles.description<>excluded.description";
   const result=await env.DB.prepare(sql).bind(...part.flat()).run();
   inserted+=result.meta?.changes||0;
  }
@@ -19,7 +19,8 @@ async function store(env,country,articles){
 }
 async function run(env,at){
  const cycle=Math.floor(at/600000);
- const codes=[COUNTRIES[cycle%COUNTRIES.length],COUNTRIES[(cycle+7)%COUNTRIES.length]];
+ const batch=cycle%4;
+ const codes=COUNTRIES.slice(batch*4,batch*4+4);
  for(const country of codes){
   try{
    const response=await fetch("https://globalnews-a0q.pages.dev/api/news?country="+country,{signal:AbortSignal.timeout(25000)});
@@ -28,7 +29,7 @@ async function run(env,at){
    if(!Array.isArray(data.articles))throw Error("Unexpected news feed format");
    if(!env.DB){console.error("D1 binding missing, cannot store",country);continue}
    const inserted=await store(env,country,data.articles);
-   console.log("GlobalNews",country,"checked",data.articles.length,"new",inserted);
+   console.log("GlobalNews",country,"checked",data.articles.length,"new-or-corrected",inserted);
   }catch(e){console.error("GlobalNews cycle failed",country,String(e));if(env.DB)try{await env.DB.prepare("INSERT INTO ingestion_log(country,fetched,inserted,status) VALUES (?,?,?,?)").bind(country,0,0,String(e).slice(0,160)).run()}catch{}}
  }
 }

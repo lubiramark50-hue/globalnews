@@ -39,3 +39,10 @@ node --check worker/ingest.js
 Live smoke tests: `/`, `/api/news?country=UG`, `/api/location`. Inspect Cloudflare Worker Cron logs and D1 `ingestion_log` for successful scheduled execution.
 
 Ad placement refinement: the responsive native slot appears in the desktop sidebar or after the tenth card on mobile; the desktop-only 468×60 banner is suppressed for narrow viewports. These ad units remain disabled until the new domain is approved by Adsterra.
+
+## 2026-10-30 hardening: restored bookmarks, deep links and data freshness
+- Story page now resolves saved/older stories from `functions/api/story/[id].js` backed by D1; local bookmark stores complete public story metadata so saved stories remain available even after news feeds rotate. It never stores any publisher article body.
+- On temporary upstream failure browser shows a clearly labelled saved-feed snapshot rather than blank results; this is not falsely presented as a fresh scrape.
+- Background ingest now polls four countries per 10-minute cycle, covering fourteen configured countries across four cycles (~40 minutes, subject to source availability), not all countries every ten minutes. Higher polling rate must be monitored against shared Cloudflare quotas.
+- Existing RSS corrections are now allowed to update stored headline/excerpt. Count in ingestion_log represents inserted-or-corrected records, though historical field is named `inserted`.
+- Site security headers are configured by Pages `_headers`. Advertising integrations remain **disabled pending GlobalNews-specific provider approval**.
