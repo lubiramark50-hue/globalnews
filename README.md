@@ -49,3 +49,6 @@ Ad placement refinement: the responsive native slot appears in the desktop sideb
 
 ## Source health transparency and tests
 The `/api/status` endpoint publishes only aggregate archive metrics (story count, last successful ingestion and countries checked in 24 hours), cached at the edge. Sidebar newsroom status uses actual D1 data, rather than inventing 'live' figures. GitHub CI includes source attribution, archived article ID validation, country validation and safe failure behavior tests with mocked database access.
+
+## 2026-10-30 origin request optimization
+Normal client `/api/news?country=UG` requests now use D1's **recent successfully ingested source snapshot** when one exists (up to 50 minutes old, matching four-country rotation), cached at the edge for 5 minutes. The scheduled Worker calls `/api/news?country=UG&fresh=1` to collect upstream feeds; this path has a separate normalized cache key for 10 minutes. If the D1 snapshot is missing or stale, client API falls back to direct sources. This avoids repeatedly requesting nine RSS feeds for each visiting user or Cloudflare POP. Freshness timestamps reflect the **actual last ingestion check**, not merely the webpage request time. `fresh=1` never disables caching and does not allow arbitrary source URLs.

@@ -23,7 +23,7 @@ async function run(env,at){
  const codes=COUNTRIES.slice(batch*4,batch*4+4);
  for(const country of codes){
   try{
-   const response=await fetch("https://globalnews-a0q.pages.dev/api/news?country="+country,{signal:AbortSignal.timeout(25000)});
+   const response=await fetch("https://globalnews-a0q.pages.dev/api/news?country="+country+"&fresh=1",{signal:AbortSignal.timeout(25000)});
    if(!response.ok)throw Error("Feed gateway HTTP "+response.status);
    const data=await response.json();
    if(!Array.isArray(data.articles))throw Error("Unexpected news feed format");

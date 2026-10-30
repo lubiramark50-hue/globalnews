@@ -30,3 +30,16 @@ test('status returns archive counts without revealing database internals',async(
  const r=await status({env});const d=await r.json();
  assert.equal(r.status,200);assert.equal(d.archivedArticles,293);assert.equal(d.collectionScheduleMinutes,10);assert.equal('databaseId' in d,false);
 });
+
+test('archive-backed country feed avoids upstream RSS fetches for a fresh D1 snapshot',async()=>{
+ const oldCache=globalThis.caches,oldFetch=globalThis.fetch;
+ let called=0;
+ globalThis.caches={default:{match:async()=>null,put:async()=>{}}};
+ globalThis.fetch=async()=>{called++;throw Error('Origin must not be fetched when D1 is fresh')};
+ const env={DB:{prepare:q=>({bind:()=>({
+  first:async()=>({checked:new Date().toISOString().replace('T',' ').replace('Z','')}),
+  all:async()=>({results:[{id:'story123',title:'Verified source headline',description:'Source excerpt',source:'Example',url:'https://example.com/s',image:null,category:'World',country:null,regional:0,published_at:'2026-10-30T10:00:00Z'}]})
+ })})}};
+ try{const r=await news({request:new Request('https://example.org/api/news?country=UG'),env});const d=await r.json();assert.equal(r.status,200);assert.equal(d.articles.length,1);assert.equal(d.fromArchive,true);assert.equal(called,0)}
+ finally{globalThis.caches=oldCache;globalThis.fetch=oldFetch}
+});
