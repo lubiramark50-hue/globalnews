@@ -1,0 +1,23 @@
+name: Validate GlobalNews
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript files
+        run: |
+          node --check public/app.js
+          node --check functions/api/news.js
+          node --check worker/ingest.js
+      - name: Check required assets
+        run: |
+          test -s public/index.html
+          test -s public/styles.css
+          test -s sql/schema.sql
