@@ -17,6 +17,7 @@ jobs:
           node --check functions/api/news.js
           node --check functions/api/location.js
           node --check functions/api/status.js
+          node --check functions/api/search.js
           node --check 'functions/api/story/[id].js'
           node --check worker/ingest.js
       - name: Run regression tests

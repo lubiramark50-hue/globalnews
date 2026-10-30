@@ -52,3 +52,6 @@ The `/api/status` endpoint publishes only aggregate archive metrics (story count
 
 ## 2026-10-30 origin request optimization
 Normal client `/api/news?country=UG` requests now use D1's **recent successfully ingested source snapshot** when one exists (up to 50 minutes old, matching four-country rotation), cached at the edge for 5 minutes. The scheduled Worker calls `/api/news?country=UG&fresh=1` to collect upstream feeds; this path has a separate normalized cache key for 10 minutes. If the D1 snapshot is missing or stale, client API falls back to direct sources. This avoids repeatedly requesting nine RSS feeds for each visiting user or Cloudflare POP. Freshness timestamps reflect the **actual last ingestion check**, not merely the webpage request time. `fresh=1` never disables caching and does not allow arbitrary source URLs.
+
+## Full archive search
+`GET /api/search?q=...` performs bounded, parameterized D1 searches over attributed headline/excerpt metadata and returns a maximum of 60 matches. The reader-facing Search page now uses this endpoint rather than searching only the current ~120 RSS stories, preserves a shareable `/search?q=` route, and provides loading/empty/error states. No publisher full article bodies are indexed.

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {onRequestGet as story} from '../functions/api/story/[id].js';
 import {onRequestGet as news} from '../functions/api/news.js';
 import {onRequestGet as status} from '../functions/api/status.js';
+import {onRequestGet as search} from '../functions/api/search.js';
 
 test('archive rejects malformed identifiers without database access',async()=>{
  const r=await story({params:{id:'../../danger'},env:{DB:{prepare:()=>{throw Error('unreachable')}}}});
@@ -42,4 +43,15 @@ test('archive-backed country feed avoids upstream RSS fetches for a fresh D1 sna
  })})}};
  try{const r=await news({request:new Request('https://example.org/api/news?country=UG'),env});const d=await r.json();assert.equal(r.status,200);assert.equal(d.articles.length,1);assert.equal(d.fromArchive,true);assert.equal(called,0)}
  finally{globalThis.caches=oldCache;globalThis.fetch=oldFetch}
+});
+
+test('search requires meaningful query',async()=>{
+ const r=await search({request:new Request('https://example.org/api/search?q=x'),env:{}});
+ assert.equal(r.status,400);
+});
+test('search binds user input and maps source attribution',async()=>{
+ const parameters=[];
+ const env={DB:{prepare:sql=>{assert.ok(sql.includes('LIKE ?'));return{bind:(...values)=>{parameters.push(...values);return{all:async()=>({results:[{id:'a1',title:'Source result',description:'Excerpt',source:'Example publication',url:'https://example.org/a',image:null,category:'World',country:null,regional:0,published_at:null}]})}}}}}};
+ const r=await search({request:new Request('https://example.org/api/search?q=source'),env});const result=await r.json();
+ assert.equal(r.status,200);assert.equal(result.count,1);assert.equal(result.articles[0].source,'Example publication');assert.deepEqual(parameters,['%source%','%source%']);
 });
