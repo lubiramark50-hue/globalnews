@@ -46,3 +46,6 @@ Ad placement refinement: the responsive native slot appears in the desktop sideb
 - Background ingest now polls four countries per 10-minute cycle, covering fourteen configured countries across four cycles (~40 minutes, subject to source availability), not all countries every ten minutes. Higher polling rate must be monitored against shared Cloudflare quotas.
 - Existing RSS corrections are now allowed to update stored headline/excerpt. Count in ingestion_log represents inserted-or-corrected records, though historical field is named `inserted`.
 - Site security headers are configured by Pages `_headers`. Advertising integrations remain **disabled pending GlobalNews-specific provider approval**.
+
+## Source health transparency and tests
+The `/api/status` endpoint publishes only aggregate archive metrics (story count, last successful ingestion and countries checked in 24 hours), cached at the edge. Sidebar newsroom status uses actual D1 data, rather than inventing 'live' figures. GitHub CI includes source attribution, archived article ID validation, country validation and safe failure behavior tests with mocked database access.

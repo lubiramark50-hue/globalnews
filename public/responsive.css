@@ -39,3 +39,13 @@ html{scroll-padding-top:100px}body{min-width:0;overflow-x:clip}.skip-content{pos
  .hero .hero-body{max-width:100%}
  .reader .primary-link{max-width:100%;overflow-wrap:anywhere;text-align:center}
 }
+
+/* Real newsroom archive freshness, no fake live badge. */
+.desk-heading{display:flex;align-items:center;gap:9px}.desk-heading h3{margin:0;font-size:15px}
+.desk-led{width:9px;height:9px;border-radius:50%;background:#39bd8f;box-shadow:0 0 0 4px rgba(57,189,143,.12);flex:0 0 9px}
+.desk-summary{font-size:12px;line-height:1.6;margin:12px 0;color:var(--muted)}
+.desk-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.desk-metrics>div{background:var(--soft);padding:12px;border-radius:10px;min-width:0}
+.desk-metrics b{display:block;color:var(--ink);font-size:20px;font-family:Manrope,sans-serif}
+.desk-metrics small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.desk-note{color:var(--muted);font-size:11px;line-height:1.7;margin:12px 0 0}

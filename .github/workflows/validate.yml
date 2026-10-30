@@ -16,7 +16,11 @@ jobs:
           node --check public/app.js
           node --check functions/api/news.js
           node --check functions/api/location.js
+          node --check functions/api/status.js
+          node --check 'functions/api/story/[id].js'
           node --check worker/ingest.js
+      - name: Run regression tests
+        run: node --experimental-default-type=module --test tests/*.mjs
       - name: Validate assets
         run: |
           test -s public/index.html
