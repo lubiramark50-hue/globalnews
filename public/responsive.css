@@ -23,3 +23,8 @@ html{scroll-padding-top:100px}body{min-width:0;overflow-x:clip}.skip-content{pos
 @media(max-width:470px){.logo{font-size:20px}.logo-symbol{width:32px;height:32px}.header-content{gap:6px}.settings-chip{min-height:37px;padding:7px}.icon-btn{padding:8px}.intro-right{display:none}.hero{min-height:335px}.hero-body p{font-size:12px;line-height:1.5}.minihero{min-height:180px}.minihero .story-meta{font-size:9px}.story-card{grid-template-columns:minmax(105px,38%) minmax(0,1fr)}.story-thumb{min-height:136px}.story-body{padding:10px}.story-body h3{font-size:12.5px}.story-card .card-actions a{font-size:9.5px}.footer-bottom{font-size:10px}}
 @media(max-width:335px){.mini-stack{grid-template-columns:1fr}.minihero{min-height:170px}.story-card{grid-template-columns:32% minmax(0,1fr)}.story-body h3{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.story-card{transition:none}}
+
+/* Adsterra unit location: desktop right rail, phone after tenth story. */
+@media(min-width:761px){.ad-native[data-ad-placement="feed"]{display:none!important}}
+@media(max-width:760px){.ad-native[data-ad-placement="sidebar"]{display:none!important}.ad-native[data-ad-placement="feed"].ad-ready:not([hidden]){display:block;grid-column:1/-1;width:100%;margin:8px 0 16px}}
+[data-theme="dark"] .nav.open{background:var(--card);color:var(--ink)}

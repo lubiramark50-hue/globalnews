@@ -37,3 +37,5 @@ node --check worker/ingest.js
 ```
 
 Live smoke tests: `/`, `/api/news?country=UG`, `/api/location`. Inspect Cloudflare Worker Cron logs and D1 `ingestion_log` for successful scheduled execution.
+
+Ad placement refinement: the responsive native slot appears in the desktop sidebar or after the tenth card on mobile; the desktop-only 468×60 banner is suppressed for narrow viewports. These ad units remain disabled until the new domain is approved by Adsterra.

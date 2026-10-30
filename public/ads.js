@@ -7,7 +7,8 @@
  let nativeRoot=null, bannerRoot=null, nativeLoaded=false, bannerLoaded=false;
  const reveal=s=>{s.hidden=false;s.classList.add("ad-ready")};
  const mount=()=>{
-  const nativeSlot=document.querySelector('[data-ad-unit="native"]');
+  const mobile=matchMedia('(max-width:760px)').matches;
+  const nativeSlot=mobile?(document.querySelector('[data-ad-unit="native"][data-ad-placement="feed"]')||document.querySelector('[data-ad-unit="native"][data-ad-placement="sidebar"]')):document.querySelector('[data-ad-unit="native"][data-ad-placement="sidebar"]');
   if(nativeSlot){
    const host=nativeSlot.querySelector(".ad-content");
    if(host){
