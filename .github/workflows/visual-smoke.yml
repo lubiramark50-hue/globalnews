@@ -1,0 +1,31 @@
+name: GlobalNews Visual Regression
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'public/**'
+      - 'scripts/visual-smoke.mjs'
+      - '.github/workflows/visual-smoke.yml'
+jobs:
+  browser-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium test runtime
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Test Android and Windows views
+        run: node scripts/visual-smoke.mjs
+      - name: Save responsive screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: globalnews-responsive-screens
+          path: screenshots/
+          retention-days: 7
