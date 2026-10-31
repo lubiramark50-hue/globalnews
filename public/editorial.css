@@ -67,3 +67,13 @@ a:focus-visible,button:focus-visible{outline-offset:2px}
 }
 @media(max-width:390px){.story-card{grid-template-columns:35% 65%}.story-body h3{font-size:14px}.minihero{min-height:170px}}
 @media(prefers-reduced-motion:reduce){.story-card:hover{transform:none}}
+
+/* Publication-first image handling: never fabricate news photography. */
+.hero .hero-bg{background:#132e48}
+.hero .hero-bg::after{display:none}
+.story-thumb::before{content:"GlobalNews";font:700 12px/1 "DM Sans",sans-serif;letter-spacing:.15em;color:#dce8f3;opacity:.42}
+.story-thumb img{z-index:1}
+.minihero:not(:has(img)){background:#18334c}
+.hero:not(:has(img)){background:#18334c}
+[data-theme="dark"] .mobile-dock a.active{background:#203750;color:#b7d8ff}
+@media(max-width:760px){.hero:not(:has(img)){min-height:270px}.minihero:not(:has(img)){min-height:154px}}
