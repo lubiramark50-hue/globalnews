@@ -24,10 +24,10 @@ if(!fresh&&env?.DB){
   const check=await env.DB.prepare("SELECT max(checked_at) AS checked FROM ingestion_log WHERE country=? AND status='ok'").bind(country).first();
   const checked=check?.checked?Date.parse(check.checked.replace(' ','T')+'Z'):NaN;
   if(Number.isFinite(checked)&&Date.now()-checked<50*60000){
-   const result=await env.DB.prepare("SELECT id,title,description,source,url,image,category,country,regional,published_at FROM articles WHERE country=? OR regional=0 ORDER BY published_at DESC LIMIT 120").bind(country).all();
-   const articles=(result.results||[]).map(s=>({id:s.id,title:s.title,description:s.source?.startsWith('Google News')?'':clean(s.description||'').replace(/<[^>]*>/g,' ').slice(0,450),summary:s.source?.startsWith('Google News')?'':clean(s.description||'').replace(/<[^>]*>/g,' ').slice(0,450),source:s.source,url:s.url,image:s.image,category:s.category,regional:!!s.regional,region:s.country||null,publishedAt:s.published_at||null}));
+   const result=await env.DB.prepare("SELECT a.id,a.title,a.description,a.source,a.url,a.image,a.category,a.country,a.regional,a.published_at,ai.summary AS gemini_summary,ai.model AS gemini_model FROM articles a LEFT JOIN article_summaries ai ON ai.article_id=a.id WHERE a.country=? OR a.regional=0 ORDER BY a.published_at DESC LIMIT 120").bind(country).all();
+   const articles=(result.results||[]).map(s=>({id:s.id,title:s.title,description:s.source?.startsWith('Google News')?'':clean(s.description||'').replace(/<[^>]*>/g,' ').slice(0,450),summary:s.gemini_summary|| (s.source?.startsWith('Google News')?'':clean(s.description||'').replace(/<[^>]*>/g,' ').slice(0,450)),aiGenerated:!!s.gemini_summary,aiModel:s.gemini_model||null,source:s.source,url:s.url,image:s.image,category:s.category,regional:!!s.regional,region:s.country||null,publishedAt:s.published_at||null}));
    if(articles.length){
-    const response=Response.json({articles,checkedAt:new Date(checked).toISOString(),country,aiSummariesEnabled:false,fromArchive:true,warning:''},{headers:{"Cache-Control":"public,max-age=60,s-maxage=300,stale-while-revalidate=600","X-Content-Type-Options":"nosniff"}});
+    const response=Response.json({articles,checkedAt:new Date(checked).toISOString(),country,aiSummariesEnabled:articles.some(a=>a.aiGenerated),fromArchive:true,warning:''},{headers:{"Cache-Control":"public,max-age=60,s-maxage=300,stale-while-revalidate=600","X-Content-Type-Options":"nosniff"}});
     await cache.put(cacheKey,response.clone());
     return response;
    }

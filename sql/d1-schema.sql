@@ -3,3 +3,7 @@ CREATE INDEX IF NOT EXISTS articles_recent ON articles(published_at DESC);
 CREATE INDEX IF NOT EXISTS articles_country ON articles(country,published_at DESC);
 CREATE INDEX IF NOT EXISTS articles_category ON articles(category,published_at DESC);
 CREATE TABLE IF NOT EXISTS ingestion_log(id INTEGER PRIMARY KEY AUTOINCREMENT,country TEXT NOT NULL,checked_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,fetched INTEGER NOT NULL DEFAULT 0,inserted INTEGER NOT NULL DEFAULT 0,status TEXT NOT NULL DEFAULT 'ok');
+
+CREATE TABLE IF NOT EXISTS article_summaries(article_id TEXT PRIMARY KEY REFERENCES articles(id),summary TEXT NOT NULL,model TEXT NOT NULL,source_url TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS ai_usage_log(id INTEGER PRIMARY KEY AUTOINCREMENT,at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,model TEXT NOT NULL,status TEXT NOT NULL,article_id TEXT);
+CREATE INDEX IF NOT EXISTS ai_usage_by_day ON ai_usage_log(at,status);

@@ -1,0 +1,19 @@
+{
+  "name": "GlobalNews — Your world in focus",
+  "short_name": "GlobalNews",
+  "description": "Source-attributed world and local headlines",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f9fb",
+  "theme_color": "#0c2947",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

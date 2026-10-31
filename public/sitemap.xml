@@ -1,1 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://globalnews-a0q.pages.dev/</loc></url><url><loc>https://globalnews-a0q.pages.dev/world</loc></url><url><loc>https://globalnews-a0q.pages.dev/local</loc></url></urlset>
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://globalnews-a0q.pages.dev/</loc></url>
+  <url><loc>https://globalnews-a0q.pages.dev/world</loc></url>
+  <url><loc>https://globalnews-a0q.pages.dev/local</loc></url>
+  <url><loc>https://globalnews-a0q.pages.dev/technology</loc></url>
+  <url><loc>https://globalnews-a0q.pages.dev/business</loc></url>
+  <url><loc>https://globalnews-a0q.pages.dev/sports</loc></url>
+  <url><loc>https://globalnews-a0q.pages.dev/science</loc></url>
+  <url><loc>https://globalnews-a0q.pages.dev/videos</loc></url>
+  <url><loc>https://globalnews-a0q.pages.dev/about</loc></url>
+  <url><loc>https://globalnews-a0q.pages.dev/standards</loc></url>
+  <url><loc>https://globalnews-a0q.pages.dev/sources</loc></url>
+  <url><loc>https://globalnews-a0q.pages.dev/privacy</loc></url>
+</urlset>

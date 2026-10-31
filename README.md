@@ -58,3 +58,11 @@ Normal client `/api/news?country=UG` requests now use D1's **recent successfully
 
 ### Source excerpt quality
 Google News regional RSS often contains nested HTML links instead of licensed editorial summary text. GlobalNews now intentionally omits those aggregator descriptions rather than showing broken markup or pretending to have full article text. Nonregional RSS descriptions are cleaned and publisher attributed. Existing archive records from Google News are normalized in reader/search API outputs while future ingest stores clean metadata.
+
+## 2026-10-31 Gemini editorial integration (key required)
+The deployed Worker can prepare Gemini-assisted summaries of *existing publisher headlines/excerpts*. It will **not** ask Gemini to invent news. The source remains attributed. Securely set `GEMINI_API_KEY` as a Cloudflare Worker secret. Never commit or paste the key into public code. Model: `gemini-3.5-flash-lite`, server-side REST API. Generation is disabled when no key exists, limited to 2 articles per cron cycle and **12 attempted calls per UTC day** by default (maximum configurable limit 40 with `GEMINI_DAILY_LIMIT`), with recorded success/failures in D1, conservative factual grounding and manual source-verification caveats. Articles without enough source text are deliberately skipped. D1 tables `article_summaries` and `ai_usage_log` were created separately without altering old records.
+
+Source copy is NOT independent verification; the interface labels Gemini content as an AI-assisted briefing based on a single publisher excerpt. Missing keys do not break the RSS pipeline.
+
+## Editorial redesign, mobile experience and SEO
+A separate editorial stylesheet now uses restrained publication typography and avoids excessive card shadows/gradients. Desktop, tablet and Android phone remain distinct at proper breakpoints. The web app includes a minimal install manifest, canonical metadata and clear page indexing policies. `robots.txt` references an expanded sitemap of primary category and policy pages. Saved/search/article aggregation pages aren't submitted as original news content; indexed pages remain attributable. Search Console property verification and actual indexing are separate requirements, and sitemap submission alone never guarantees inclusion in Google results.
