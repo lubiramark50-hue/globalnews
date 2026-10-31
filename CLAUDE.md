@@ -15,7 +15,7 @@ Audit, improve, thoroughly test and safely deploy the existing **GlobalNews** ne
 - Some responsive/mobile polishing exists but is not proven across all phone/tablet/desktop dimensions.
 - Cron fires every 10 minutes, but currently rotates about **two of 14 countries per cycle**: full rotation approximately **70 minutes**. Don't say every country refreshes every 10 minutes unless code, data and logs prove it.
 - Current article feed consists largely of publisher RSS headlines/excerpts and publisher links, not independently verified AI-written news.
-- **OpenAI editorial summarization, translation and review are not yet operational.** Language preference controls do not themselves translate any story.
+- **Gemini editorial summarization, translation and review are not yet operational.** Language preference controls do not themselves translate any story.
 - **GlobalNews has no verified Adsterra approval or website-specific codes.** Current config stages Troot Window identifiers and is disabled intentionally. Do not turn it on without correct approved codes and consent/policy checks.
 - Some multimedia is only a direct external publisher link; don't claim live embedded videos, rights or capabilities that haven't been implemented.
 
@@ -55,9 +55,9 @@ Audit, improve, thoroughly test and safely deploy the existing **GlobalNews** ne
 - Route by actual news region/topic rather than simply publisher location; give each reader local news plus high-impact international news without echo chambers.
 - Keep database isolated; do schema migrations without destructive drops; provide backup/rollback path.
 
-### 7. OpenAI editorial system (only if authorized and funded)
-- User specifically wants **OpenAI as the only live editorial AI provider**. Claude may edit code but must NOT install another production editorial AI model or silently substitute another provider.
-- Provide server-only OpenAI API integration after secure key availability, explicit cost budget and verification safeguards. Do not commit or print secrets.
+### 7. Gemini editorial system (only if authorized and funded)
+- User explicitly chose **Gemini as the production editorial summarization provider**. Claude may edit code but must NOT install another production editorial AI model or silently substitute another provider.
+- Provide server-only Gemini API integration after secure key availability, explicit cost budget and verification safeguards. Do not commit or print secrets.
 - Design source-grounded ranking and clustering, multilingual original summaries, diversity of publishers, distinction between confirmed and developing stories, original source links, corrections/retractions, reliability/importance scoring and human escalation for high-risk disputes.
 - Translation must actually work and be QA-tested (especially Luganda, Kiswahili, Arabic and other supported locales), with original-language toggle. If unavailable, label honestly; never fake translations.
 - Track AI costs per story, hard budgets, retries/rate limits, review reasons and model/version provenance. Accuracy takes precedence over number of stories.
@@ -74,7 +74,7 @@ Audit, improve, thoroughly test and safely deploy the existing **GlobalNews** ne
 - Set up repeatable tests: Node syntax, lint/format, feed parser/unit tests, simulated RSS failures and retractions, D1 integration smoke tests, browser Playwright E2E for each key user journey and viewport, visual regression screenshots, broken link check, accessibility and secret scanning. CI must not require production keys.
 - Work in small commits and PRs, avoiding giant untested rewrites. Do NOT disable existing functionality just to obtain a clean screenshot.
 - Keep GlobalNews live. Deploy tested code to the existing user-owned Cloudflare project; verify success and real HTTP/browser behavior, confirm scheduled Worker continues separately, document rollback.
-- For each completed phase report changed files, commit/PR links, test results, screenshot evidence for mobile+desktop, live URL, current production status, verified database freshness and unresolved dependencies. **Do not assert 100% perfection, live ads, full OpenAI publishing or global 10-minute freshness without real evidence.**
+- For each completed phase report changed files, commit/PR links, test results, screenshot evidence for mobile+desktop, live URL, current production status, verified database freshness and unresolved dependencies. **Do not assert 100% perfection, live ads, full Gemini publishing or global 10-minute freshness without real evidence.**
 - If external browser snapshot tooling returns Cloudflare 429, stop retrying aggressively; use a different authorized test approach and explicitly disclose any unverified items.
 
 ## Definition of done

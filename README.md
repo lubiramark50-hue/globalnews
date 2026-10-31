@@ -22,7 +22,7 @@ Worker source: `worker/ingest.js`, Wrangler config: `worker/wrangler.toml`. Data
 
 ## Limits and safeguards
 - Curated RSS discovery is **not comprehensive worldwide coverage**. Publishers can be delayed, inaccessible, or restrict reuse.
-- The app currently shows **original source excerpts**, **not** OpenAI summaries. OpenAI editorial processing and translation are NOT enabled without a funded OpenAI API key, server-only secrets, reliable source verification, review controls and budget protection. Never expose API keys to the browser.
+- The app currently shows **original source excerpts**, **not** Gemini summaries. Gemini editorial processing and translation are NOT enabled without a funded Gemini API key, server-only secrets, reliable source verification, review controls and budget protection. Never expose API keys to the browser.
 - Language options currently save a preference but do **not** translate articles. The interface explicitly tells users this.
 - Videos link to original news channels; full videos or copyrighted publisher assets are not hosted without permission.
 - Verify editorial facts with primary sources and ensure corrections/withdrawals are supported before scaling.
