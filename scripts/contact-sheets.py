@@ -25,6 +25,10 @@ for label,short in [("android-390","android"),("windows-1440","windows")]:
         try:
             with Image.open(path) as original:
                 picture=original.convert("RGB")
+                # An entire news feed may be tens of thousands of pixels tall.
+                # Show the first editorial viewport at legible scale; full pages remain in the archive.
+                crop_height=360 if short=="android" else 720
+                picture=picture.crop((0,0,picture.width,min(picture.height,crop_height)))
                 picture.thumbnail((w-22,h-52),Image.Resampling.LANCZOS)
                 ix=index%cols
                 iy=index//cols

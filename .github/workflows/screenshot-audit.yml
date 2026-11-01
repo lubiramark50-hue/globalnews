@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/screenshot-audit.mjs'
+      - 'scripts/contact-sheets.py'
       - '.github/workflows/screenshot-audit.yml'
 permissions:
   contents: write
