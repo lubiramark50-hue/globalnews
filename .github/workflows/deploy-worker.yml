@@ -1,0 +1,38 @@
+name: Deploy ingest Worker and set Gemini key (manual)
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+    env:
+      GEMINI_KEY: ${{ secrets.GEMINIAPI }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 1aec604c2c2401940cd93136962a7ef5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run tests
+        run: node --experimental-default-type=module --test tests/*.mjs
+      - name: Check the Gemini key (prints HTTP status codes only, never the key)
+        run: |
+          test -n "$GEMINI_KEY" || { echo "::error::Repository secret GEMINIAPI is missing"; exit 1; }
+          code=$(curl -s -o /dev/null -w '%{http_code}' -H "x-goog-api-key: $GEMINI_KEY" "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite")
+          echo "Model lookup: HTTP $code"
+          [ "$code" = "200" ] || { echo "::error::Gemini rejected the key or model (HTTP $code)"; exit 1; }
+          code=$(curl -s -o /tmp/g.json -w '%{http_code}' -H "x-goog-api-key: $GEMINI_KEY" -H "Content-Type: application/json" -d '{"contents":[{"role":"user","parts":[{"text":"Reply with the single word ok."}]}],"generationConfig":{"maxOutputTokens":64}}' "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent")
+          echo "Test generation: HTTP $code"
+          [ "$code" = "200" ] || { echo "::error::Gemini generation failed (HTTP $code) - check billing or quota"; exit 1; }
+      - name: Deploy Worker and store the key as a Worker secret
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Repository secret CLOUDFLARE_API_TOKEN is missing"; exit 1; }
+          cd worker
+          npx --yes wrangler@4 deploy
+          printf %s "$GEMINI_KEY" | npx --yes wrangler@4 secret put GEMINI_API_KEY
+      - name: Show Worker health
+        continue-on-error: true
+        run: |
+          sleep 8
+          curl -s https://globalnews-ingest.lubiramark50-genz-stage.workers.dev/health | head -c 800
