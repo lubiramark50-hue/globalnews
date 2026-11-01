@@ -1,0 +1,30 @@
+name: GlobalNews QA visual preview
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/qa-visual-preview.yml'
+permissions:
+  contents: write
+jobs:
+  publish-previews:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Encode existing publication contact sheets for review
+        run: |
+          test -f docs/qa/globalnews-android-contact-sheet.jpg
+          test -f docs/qa/globalnews-windows-contact-sheet.jpg
+          base64 -w0 docs/qa/globalnews-android-contact-sheet.jpg > docs/qa/android-preview.base64.txt
+          base64 -w0 docs/qa/globalnews-windows-contact-sheet.jpg > docs/qa/windows-preview.base64.txt
+      - name: Publish temporary preview text
+        run: |
+          git config user.name "globalnews-qa-bot"
+          git config user.email "qa-bot@users.noreply.github.com"
+          git add docs/qa/*.base64.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Temporarily expose screenshot preview images for visual QA"
+            git push origin HEAD:main
+          fi
