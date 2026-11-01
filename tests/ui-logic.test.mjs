@@ -6,3 +6,5 @@ test('no inline event handlers (CSP is script-src self)',()=>assert.doesNotMatch
 test('unknown routes render a noindex not-found page',()=>{assert.match(app,/'notfound'/);assert.match(app,/noindex/)});
 test('Adsterra stays disabled until GlobalNews has approved codes',()=>assert.match(readFileSync('public/ads-config.js','utf8'),/enabled:\s*false/));
 test('touch-target rules present',()=>assert.match(readFileSync('public/publication.css','utf8'),/\.bookmark\{width:44px/));
+test('icons are SVG, not text glyphs',()=>{assert.doesNotMatch(app,/[↗↓⌄→]/);assert.match(readFileSync('public/index.html','utf8'),/id="i-out"/)});
+test('no decorative text glyphs in stylesheets',()=>{for(const f of ['styles','responsive','editorial','finish','publication'])assert.doesNotMatch(readFileSync('public/'+f+'.css','utf8'),/[◉◎◌]/)});

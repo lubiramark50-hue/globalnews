@@ -243,3 +243,11 @@ body{background:var(--bg);color:var(--ink);font-family:"DM Sans",Arial,sans-seri
 .story-card:focus-within{outline:2px solid #1d5fd1;outline-offset:2px}
 @media(max-width:760px){#saved-btn{display:none}.nav.open a{min-height:52px}}
 @media(max-width:375px){.header-actions .icon-btn,.header-actions .settings-chip{min-width:40px;min-height:40px}}
+
+/* Icons: one consistent line set; no decorative text glyphs */
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+.ic{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.14em;margin-left:.3em;flex:none}
+small .ic,button .ic{margin-left:.25em}
+/* Quiet editorial placeholder texture instead of oversized glyphs */
+.story-thumb::before,.dark-panel::before,.hero .hero-bg::after{content:"";font-size:0;color:transparent;position:absolute;inset:0;right:auto;top:auto;width:auto;height:auto;pointer-events:none;background:repeating-linear-gradient(135deg,rgba(255,255,255,.055) 0 1px,transparent 1px 13px)}
+.story-thumb:has(img)::before{display:none}
