@@ -231,3 +231,15 @@ body{background:var(--bg);color:var(--ink);font-family:"DM Sans",Arial,sans-seri
 }
 @media(max-width:335px){.topline-inner::after{content:"GLOBAL NEWS";font-size:8px}.header-actions .settings-chip{width:36px;min-width:36px}}
 [data-theme="dark"] .header-actions .settings-chip .settings-pin{color:#deebf7!important}
+
+/* QA pass: touch targets and focus visibility (WCAG 2.2 target size, ~44px) */
+.bookmark{width:44px;height:44px;min-width:44px;display:inline-grid;place-items:center}
+.card-actions{gap:8px}
+.card-actions a,.trend-item a,.region-link{min-height:44px;display:inline-flex;align-items:center}
+.icon-btn{min-width:44px;min-height:44px}
+.settings-chip,.refresh,.chip,.edition-control{min-height:44px}
+.logo,.nav a{min-height:44px}
+.nav a{display:inline-flex;align-items:center}
+.story-card:focus-within{outline:2px solid #1d5fd1;outline-offset:2px}
+@media(max-width:760px){#saved-btn{display:none}.nav.open a{min-height:52px}}
+@media(max-width:375px){.header-actions .icon-btn,.header-actions .settings-chip{min-width:40px;min-height:40px}}
