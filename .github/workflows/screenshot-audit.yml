@@ -1,0 +1,30 @@
+name: GlobalNews Full-Page Screenshot Audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/screenshot-audit.mjs'
+      - '.github/workflows/screenshot-audit.yml'
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Capture all page layouts on Android and Windows
+        run: node scripts/screenshot-audit.mjs
+      - name: Upload screenshots and report even on test failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: globalnews-full-page-audit
+          path: screenshots/audit/
+          retention-days: 14
