@@ -66,3 +66,6 @@ Source copy is NOT independent verification; the interface labels Gemini content
 
 ## Editorial redesign, mobile experience and SEO
 A separate editorial stylesheet now uses restrained publication typography and avoids excessive card shadows/gradients. Desktop, tablet and Android phone remain distinct at proper breakpoints. The web app includes a minimal install manifest, canonical metadata and clear page indexing policies. `robots.txt` references an expanded sitemap of primary category and policy pages. Saved/search/article aggregation pages aren't submitted as original news content; indexed pages remain attributable. Search Console property verification and actual indexing are separate requirements, and sitemap submission alone never guarantees inclusion in Google results.
+
+## Screenshot-led frontend audit and accessibility follow-up (2026-11-01)
+An automated Chromium audit records full-page captures of all 14 main GlobalNews routes at 390px Android and 1440px Windows sizes, plus article, populated saved/search, preferences, dark mode and mobile menu. CI archives screenshots and a JSON report. Follow-up changes make regional edition selection accessible from the page heading, restore accurate page descriptions after SPA navigation, mark the active desktop navigation item for screen readers, and expose Science and all primary categories in the footer.

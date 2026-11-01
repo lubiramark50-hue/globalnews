@@ -158,3 +158,19 @@ body{background:var(--bg);color:var(--ink);font-family:"DM Sans",Arial,sans-seri
 [data-theme="dark"] .article-source{background:#243b4c!important}
 [data-theme="dark"] .footer{background:#0c1c2a}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.story-card{transition:none}}
+
+/* Screenshot audit polish: consistent navigation and actionable edition chooser. */
+.edition-control{cursor:pointer;border-radius:2px;min-height:37px;display:inline-flex;align-items:center;gap:8px}
+.edition-control:hover{border-color:#758da0;background:#f1f5f7;color:#203c55}
+.edition-control:focus-visible{outline:3px solid #5d9ade;outline-offset:2px}
+.footer-layout>div:nth-child(2) a{min-height:20px}
+.footer-layout>div:nth-child(4) a{margin:8px 0}
+.nav a[aria-current="page"]{text-decoration:none}
+[data-theme="dark"] .edition-control{color:#e0e8f0;border-color:#526a7e;background:#263e51}
+[data-theme="dark"] .edition-control:hover{background:#304a60}
+@media(max-width:760px){
+ .edition-control{font-size:10px;min-height:34px;padding:8px 10px}
+ .footer-layout{row-gap:22px}
+ .intro-right{align-items:center;gap:7px}
+}
+@media(min-width:901px) and (max-width:1220px){.nav{gap:14px}.nav a{font-size:10px}}
