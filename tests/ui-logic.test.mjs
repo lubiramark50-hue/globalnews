@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const app=readFileSync('public/app.js','utf8');
+test('no inline event handlers (CSP is script-src self)',()=>assert.doesNotMatch(app,/\son(error|click|load)=/));
+test('unknown routes render a noindex not-found page',()=>{assert.match(app,/'notfound'/);assert.match(app,/noindex/)});
+test('Adsterra stays disabled until GlobalNews has approved codes',()=>assert.match(readFileSync('public/ads-config.js','utf8'),/enabled:\s*false/));
+test('touch-target rules present',()=>assert.match(readFileSync('public/publication.css','utf8'),/\.bookmark\{width:44px/));
