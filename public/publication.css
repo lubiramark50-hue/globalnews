@@ -217,3 +217,17 @@ body{background:var(--bg);color:var(--ink);font-family:"DM Sans",Arial,sans-seri
  .info-index{font-size:14px}
  .info-aside{margin:18px 0 12px;padding:23px}
 }
+
+/* Final screenshot inspection: restore hidden phone location icon and readable compact date. */
+@media(max-width:760px){
+ .topline-inner{justify-content:space-between;overflow:hidden;gap:10px}
+ #current-date{white-space:nowrap;font-size:10px;font-weight:700}
+ .topline .top-right{display:none!important}
+ .topline-inner::after{content:"WORLD & REGIONAL";font-size:9px;letter-spacing:.095em;color:#c4d4e1;white-space:nowrap}
+ .header-actions .settings-chip{width:39px;min-width:39px;height:39px;display:flex;align-items:center;justify-content:center;padding:8px}
+ .header-actions .settings-chip .settings-pin{display:inline-flex!important;color:#254e70!important;width:19px;height:19px;align-items:center;justify-content:center}
+ .header-actions .settings-chip .settings-pin svg{display:block!important;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
+ .header-actions .settings-chip>svg{display:none!important}
+}
+@media(max-width:335px){.topline-inner::after{content:"GLOBAL NEWS";font-size:8px}.header-actions .settings-chip{width:36px;min-width:36px}}
+[data-theme="dark"] .header-actions .settings-chip .settings-pin{color:#deebf7!important}
