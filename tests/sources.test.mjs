@@ -36,3 +36,12 @@ test("archive storage respects D1 limits and writes every row",async()=>{
  const regionalRow=stmts[0].a.slice(0,10);assert.equal(regionalRow[7],"UG");assert.equal(regionalRow[8],1);
  assert.equal(stmts[0].a[17],null,"global rows carry no country");
 });
+
+import {select} from "../functions/api/news.js";
+test("regional stories are never crowded out by high-volume world feeds",()=>{
+ const world=Array.from({length:300},(_,i)=>({title:"w"+i,regional:false,publishedAt:new Date(Date.UTC(2026,10,2,12,0,0)-i*1000).toISOString()}));
+ const local=Array.from({length:5},(_,i)=>({title:"l"+i,regional:true,publishedAt:new Date(Date.UTC(2026,10,1,12,0,0)-i*1000).toISOString()}));
+ const out=select([...world,...local],100);
+ assert.equal(out.length,100);assert.equal(out.filter(a=>a.regional).length,5);
+ assert.ok(Date.parse(out[0].publishedAt)>=Date.parse(out[99].publishedAt));
+});

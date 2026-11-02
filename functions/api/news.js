@@ -77,6 +77,8 @@ export async function storeAll(env,country,articles,limit=240){
  }
  return changed;
 }
+// Keeps regional stories from being crowded out by high-volume world feeds, then orders by recency.
+export function select(articles,limit){const reg=articles.filter(a=>a.regional).slice(0,70),glob=articles.filter(a=>!a.regional).slice(0,Math.max(0,limit-reg.length));return [...reg,...glob].sort((a,b)=>Date.parse(b.publishedAt||0)-Date.parse(a.publishedAt||0))}
 const HEADERS=(sMax)=>({"Cache-Control":"public,max-age=60,s-maxage="+sMax+",stale-while-revalidate=1200","X-Content-Type-Options":"nosniff"});
 const row=s=>{const gn=s.source?.startsWith("Google News"),d=gn?"":clean(s.description||"").slice(0,450);return{id:s.id,title:s.title,description:d,summary:s.gemini_summary||d,aiGenerated:!!s.gemini_summary,aiModel:s.gemini_model||null,source:s.source,url:s.url,image:s.image,category:s.category,regional:!!s.regional,region:s.country||null,publishedAt:s.published_at||null}};
 export async function onRequestGet({request,env}){
@@ -91,8 +93,8 @@ export async function onRequestGet({request,env}){
    const check=await env.DB.prepare("SELECT max(checked_at) AS checked FROM ingestion_log WHERE country=? AND status='ok'").bind(country).first();
    const checked=check?.checked?Date.parse(check.checked.replace(" ","T")+"Z"):NaN;
    if(Number.isFinite(checked)&&Date.now()-checked<50*60000){
-    const result=await env.DB.prepare("SELECT a.id,a.title,a.description,a.source,a.url,a.image,a.category,a.country,a.regional,a.published_at,ai.summary AS gemini_summary,ai.model AS gemini_model FROM articles a LEFT JOIN article_summaries ai ON ai.article_id=a.id WHERE a.country=? OR a.regional=0 ORDER BY a.published_at DESC LIMIT 200").bind(country).all();
-    const articles=annotate((result.results||[]).map(row)).slice(0,150);
+    const result=await env.DB.prepare("SELECT a.id,a.title,a.description,a.source,a.url,a.image,a.category,a.country,a.regional,a.published_at,ai.summary AS gemini_summary,ai.model AS gemini_model FROM (SELECT * FROM (SELECT a.id,a.title,a.description,a.source,a.url,a.image,a.category,a.country,a.regional,a.published_at FROM articles a WHERE a.country=? ORDER BY a.published_at DESC LIMIT 70) UNION ALL SELECT * FROM (SELECT a.id,a.title,a.description,a.source,a.url,a.image,a.category,a.country,a.regional,a.published_at FROM articles a WHERE a.regional=0 ORDER BY a.published_at DESC LIMIT 150)) a LEFT JOIN article_summaries ai ON ai.article_id=a.id ORDER BY a.published_at DESC").bind(country).all();
+    const articles=select(annotate((result.results||[]).map(row)),150);
     if(articles.length){
      const response=Response.json({articles,checkedAt:new Date(checked).toISOString(),country,aiSummariesEnabled:articles.some(a=>a.aiGenerated),fromArchive:true,warning:""},{headers:HEADERS(300)});
      await cache.put(cacheKey,response.clone());
@@ -108,10 +110,10 @@ export async function onRequestGet({request,env}){
   const key=item.title.toLowerCase().replace(/[^a-z0-9]+/g," ").slice(0,90);if(seen.has(key))continue;seen.add(key);articles.push(item)}}
  articles.sort((a,b)=>Date.parse(b.publishedAt||0)-Date.parse(a.publishedAt||0));
  let stored=null;
- if(fresh&&env?.DB&&articles.length)try{stored=await storeAll(env,country,articles)}catch(e){console.warn("Archive store failed",String(e).slice(0,160))}
+ if(fresh&&env?.DB&&articles.length)try{stored=await storeAll(env,country,select(articles,240))}catch(e){console.warn("Archive store failed",String(e).slice(0,160))}
  if(articles.length===0&&env?.DB){try{const saved=await env.DB.prepare("SELECT id,title,description,source,url,image,category,country,regional,published_at FROM articles WHERE country=? OR regional=0 ORDER BY published_at DESC LIMIT 90").bind(country).all();for(const s of saved.results||[])articles.push({id:s.id,title:s.title,description:s.description,summary:s.description,source:s.source,url:s.url,image:s.image,category:s.category,region:s.country,regional:!!s.regional,publishedAt:s.published_at})}catch(e){console.warn("D1 fallback failed",String(e))}}
  annotate(articles);
- const payload={articles:articles.slice(0,fresh?260:150),checkedAt:new Date().toISOString(),country,aiSummariesEnabled:false,warning:articles.length?"":"Available publisher feeds are temporarily unavailable; no stories were invented."};
+ const payload={articles:select(articles,fresh?260:150),checkedAt:new Date().toISOString(),country,aiSummariesEnabled:false,warning:articles.length?"":"Available publisher feeds are temporarily unavailable; no stories were invented."};
  if(stored!==null)payload.archiveChanges=stored;
  const response=Response.json(payload,{headers:HEADERS(600)});
  if(articles.length)await cache.put(cacheKey,response.clone());
