@@ -8,3 +8,4 @@ test('Adsterra stays disabled until GlobalNews has approved codes',()=>assert.ma
 test('touch-target rules present',()=>assert.match(readFileSync('public/publication.css','utf8'),/\.bookmark\{width:44px/));
 test('icons are SVG, not text glyphs',()=>{assert.doesNotMatch(app,/[↗↓⌄→]/);assert.match(readFileSync('public/index.html','utf8'),/id="i-out"/)});
 test('no decorative text glyphs in stylesheets',()=>{for(const f of ['styles','responsive','editorial','finish','publication'])assert.doesNotMatch(readFileSync('public/'+f+'.css','utf8'),/[◉◎◌]/)});
+test('breaking and trending flags are rendered from server data',()=>{assert.match(app,/flag-breaking/);assert.match(app,/trendPool/);assert.match(readFileSync('public/publication.css','utf8'),/\.flag-breaking/)});
