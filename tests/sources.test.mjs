@@ -45,3 +45,21 @@ test("regional stories are never crowded out by high-volume world feeds",()=>{
  assert.equal(out.length,100);assert.equal(out.filter(a=>a.regional).length,5);
  assert.ok(Date.parse(out[0].publishedAt)>=Date.parse(out[99].publishedAt));
 });
+
+import {pruneOld} from "../functions/api/news.js";
+test("retention removes summaries before articles and only touches rows older than 30 days",async()=>{
+ const calls=[];const NOW=Date.parse("2026-11-03T12:00:00Z");
+ const env={DB:{prepare:sql=>({bind:(...a)=>({sql,a,all:async()=>({results:[{id:"x1"},{id:"x2"}]})})}),batch:async s=>{calls.push(...s);return[]}}};
+ const n=await pruneOld(env,NOW);
+ assert.equal(n,2);
+ assert.match(calls[0].sql,/DELETE FROM ingestion_log/);
+ const order=calls.map(c=>c.sql.match(/DELETE FROM (\w+)/)[1]);
+ assert.deepEqual(order,["ingestion_log","article_summaries","articles"]);
+ assert.deepEqual(calls[1].a,["x1","x2"]);
+});
+test("retention cutoff is 30 days and a no-op when nothing is old",async()=>{
+ const NOW=Date.parse("2026-11-03T12:00:00Z");let bound=null;
+ const env={DB:{prepare:sql=>({bind:(...a)=>{if(sql.startsWith("SELECT"))bound=a;return{all:async()=>({results:[]})}}}),batch:async()=>[]}};
+ assert.equal(await pruneOld(env,NOW),0);
+ assert.equal(bound[0],"2026-10-04T12:00:00.000Z");assert.equal(bound[2],500);
+});

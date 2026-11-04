@@ -79,6 +79,19 @@ export async function storeAll(env,country,articles,limit=240){
 }
 // Keeps regional stories from being crowded out by high-volume world feeds, then orders by recency.
 export function select(articles,limit){const reg=articles.filter(a=>a.regional).slice(0,70),glob=articles.filter(a=>!a.regional).slice(0,Math.max(0,limit-reg.length));return [...reg,...glob].sort((a,b)=>Date.parse(b.publishedAt||0)-Date.parse(a.publishedAt||0))}
+// Retention: keep 30 days of stories (summaries are removed first because of the foreign key) and 14 days of run logs.
+export async function pruneOld(env,now=Date.now(),days=30,batch=500){
+ const iso=new Date(now-days*864e5).toISOString(),plain=iso.slice(0,19).replace("T"," ");
+ const old="((published_at IS NOT NULL AND published_at<?) OR (published_at IS NULL AND ingested_at<?))";
+ const found=await env.DB.prepare("SELECT id FROM articles WHERE "+old+" ORDER BY COALESCE(published_at,ingested_at) LIMIT ?").bind(iso,plain,batch).all();
+ const ids=(found.results||[]).map(r=>r.id);
+ const stmts=[env.DB.prepare("DELETE FROM ingestion_log WHERE checked_at<?").bind(new Date(now-14*864e5).toISOString().slice(0,19).replace("T"," "))];
+ for(let i=0;i<ids.length;i+=90){const part=ids.slice(i,i+90),marks=part.map(()=>"?").join(",");
+  stmts.push(env.DB.prepare("DELETE FROM article_summaries WHERE article_id IN ("+marks+")").bind(...part));
+  stmts.push(env.DB.prepare("DELETE FROM articles WHERE id IN ("+marks+")").bind(...part));}
+ await env.DB.batch(stmts);
+ return ids.length;
+}
 const HEADERS=(sMax)=>({"Cache-Control":"public,max-age=60,s-maxage="+sMax+",stale-while-revalidate=1200","X-Content-Type-Options":"nosniff"});
 const row=s=>{const gn=s.source?.startsWith("Google News"),d=gn?"":clean(s.description||"").slice(0,450);return{id:s.id,title:s.title,description:d,summary:s.gemini_summary||d,aiGenerated:!!s.gemini_summary,aiModel:s.gemini_model||null,source:s.source,url:s.url,image:s.image,category:s.category,regional:!!s.regional,region:s.country||null,publishedAt:s.published_at||null}};
 export async function onRequestGet({request,env}){
@@ -113,8 +126,11 @@ export async function onRequestGet({request,env}){
  if(fresh&&env?.DB&&articles.length)try{stored=await storeAll(env,country,select(articles,240))}catch(e){console.warn("Archive store failed",String(e).slice(0,160))}
  if(articles.length===0&&env?.DB){try{const saved=await env.DB.prepare("SELECT id,title,description,source,url,image,category,country,regional,published_at FROM articles WHERE country=? OR regional=0 ORDER BY published_at DESC LIMIT 90").bind(country).all();for(const s of saved.results||[])articles.push({id:s.id,title:s.title,description:s.description,summary:s.description,source:s.source,url:s.url,image:s.image,category:s.category,region:s.country,regional:!!s.regional,publishedAt:s.published_at})}catch(e){console.warn("D1 fallback failed",String(e))}}
  annotate(articles);
+ let pruned=null;
+ if(fresh&&env?.DB&&Math.floor(Date.now()/6e5)%6===0)try{pruned=await pruneOld(env)}catch(e){console.warn("Prune failed",String(e).slice(0,160))}
  const payload={articles:select(articles,fresh?260:150),checkedAt:new Date().toISOString(),country,aiSummariesEnabled:false,warning:articles.length?"":"Available publisher feeds are temporarily unavailable; no stories were invented."};
  if(stored!==null)payload.archiveChanges=stored;
+ if(pruned!==null)payload.pruned=pruned;
  const response=Response.json(payload,{headers:HEADERS(600)});
  if(articles.length)await cache.put(cacheKey,response.clone());
  return response;
