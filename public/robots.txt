@@ -1,5 +1,3 @@
 User-agent: *
 Allow: /
-Disallow: /search
-Disallow: /saved
 Sitemap: https://globalnews-a0q.pages.dev/sitemap.xml
