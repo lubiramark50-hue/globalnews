@@ -1,19 +1,10 @@
-/* GlobalNews ad configuration.
- * Only activate ad units created and APPROVED for globalnews-a0q.pages.dev.
- * Never reuse ad-unit tags issued for another website.
- * Adsterra: Websites > globalnews-a0q.pages.dev > GET CODE.
- */
+/* GlobalNews Adsterra integration. Only use codes approved for this hostname.
+ * These settings are intentionally disabled until site approval is confirmed. */
 window.GlobalNewsAdConfig = Object.freeze({
   enabled: false,
+  domainApproved: false,
   approvedHost: 'globalnews-a0q.pages.dev',
-  banner: {
-    key: '', // Paste the GlobalNews-only 468x60 tag's atOptions.key.
-    width: 468,
-    height: 60,
-    source: '' // Paste the GlobalNews-only banner script HTTPS URL.
-  },
-  native: {
-    containerId: '', // Paste the exact GlobalNews native container id.
-    source: '' // Paste the GlobalNews-only native script HTTPS URL.
-  }
+  native: { containerId: '', source: '' },
+  banner: { key: '', width: 468, height: 60, source: '' },
+  rectangle: { key: '', width: 300, height: 250, source: '' }
 });

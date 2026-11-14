@@ -49,3 +49,10 @@ html{scroll-padding-top:100px}body{min-width:0;overflow-x:clip}.skip-content{pos
 .desk-metrics b{display:block;color:var(--ink);font-size:20px;font-family:Manrope,sans-serif}
 .desk-metrics small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
 .desk-note{color:var(--muted);font-size:11px;line-height:1.7;margin:12px 0 0}
+
+/* Optional site-approved rectangular sponsorship; collapse entirely on no fill. */
+.ad-rectangle{display:none}
+.ad-rectangle.ad-ready:not([hidden]){display:block;max-width:100%;margin:18px auto;padding:12px 0;border-top:1px solid var(--line)}
+.ad-rectangle .ad-content{max-width:300px;min-height:250px;display:flex;justify-content:center;align-items:center;margin:auto}
+.ad-rectangle iframe{max-width:100%}
+@media(max-width:760px){.sidebar .ad-rectangle{display:none!important}}
